@@ -4,34 +4,43 @@
 # This file should automatically connect to the server if the server is running.
 
 import sys
-import socket
 import selectors
+import socket
+import threading
+
+#first client choose a nickname
+nickname = input('Choose a nickname: ')
+
+#define client and connect to server
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect(('127.0.0.1', 55555))
+
+#define receive function
+def receive():
+    while True:
+        try:
+            message = client.recv(1024).decode('ascii')
+            if message == 'NICK':
+                client.send(nickname.encode('ascii'))
+            else:
+                print(message)
+        except:
+            print("An error occured!")
+            client.close()
+            break
+
+#define write function
+def write():
+    while True:
+        message = f'{nickname}: {input("")}'
+        client.send(message.encode('ascii'))
 
 
-SERVER_ADDRESS = '127.0.0.1'
-SERVER_PORT = 65432
-address = (SERVER_ADDRESS, SERVER_PORT)
-users =[]
-nicknames =[]
+#enable threading for muliti users. only one user at a time is recieved
+receive_thread = threading.Thread(target=receive)
+receive_thread.start()
 
-def main():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(address)
-    sock.send(b' handshake ')
-    data = sock.recv(4096)
-    print(f'received...  {data!r}')
-    #while True:
-        #data =sock.recv(4096)
-        #if not data: break
-        #sock.sedall(data)
+write_thread = threading.Thread(target=write)
+write_thread.start()
 
 
-# def receive():
-
-
-# def write():
-    #while True:
-
-
-
-main()
