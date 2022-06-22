@@ -1,7 +1,7 @@
 # client.py
 
 import socket
-import thread
+import threading
 import argparse
 import sys
 
@@ -19,7 +19,7 @@ def main(argv):
         s.connect((HOST, PORT))
         s.sendall(f"{userName} entered to the chat room".encode('ascii'))
         
-        thread.start_new_thread(receive,(s))
+        threading.start_new_thread(receive,(s))
 
         while True:
             userInput = str(input())

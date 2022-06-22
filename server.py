@@ -1,7 +1,7 @@
 # server.py
 
 import socket
-import thread
+import threading
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
@@ -44,7 +44,7 @@ s.listen(5)
 
 while True:
    c, addr = s.accept()     # Establish connection with client.
-   thread.start_new_thread(on_new_client,(c,addr))
+   threading.start_new_thread(on_new_client,(c,addr))
   
    
 
