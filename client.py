@@ -4,14 +4,20 @@ import socket
 import threading
 import argparse
 import sys
+import time
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 65432  # The port used by the server
+stop_threads = False
 
 def receive(s):
-    while True:        
+    global stop_threads
+        
+    while True: 
+        if stop_threads:
+            break
         data = s.recv(1024).decode()
-        print("\n", data)
+        print("\n>>>", data)
 
 def main(argv):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -30,9 +36,11 @@ def main(argv):
                 s.send('!LIST'.encode())
 
             elif (userInput.startswith("!QUIT") or userInput.startswith("!quit")):
-                s.send(f"{userName} disconnected".encode())
+                s.send("!QUIT".encode())
                 print("Connection closed")
-                s.close()
+                global stop_threads
+                stop_threads = True
+                x.join()
                 sys.exit()
             
             elif (userInput.startswith("!HELP") or userInput.startswith("!help")):
@@ -41,6 +49,8 @@ def main(argv):
                 print("!LIST: display list of all users")
                 print("!QUIT: quit chatting room")
                 print("!<user name> <message>: send message to specific user")
+                print("!BLOCK <user name>: block user")
+                print("!UNBLOCK <user name>: unblock user")
             else :
                 s.send(userInput.encode())
             
