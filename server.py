@@ -2,6 +2,7 @@
 
 import socket
 import threading
+import time
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
@@ -18,28 +19,49 @@ def on_new_client(conn,addr):
     userName = data[0]
     global connDict
     connDict[conn] = userName
+    for key in connDict:
+            key.send(f"{userName} connected to server".encode())
     
  
     while True:
         data = conn.recv(1024).decode()
-        if (data):
-            print(data)
+        print(userName + ": " + data)
 
         if data == "!QUIT":
+            time.sleep(2)
             break
 
-        elif data == "!LIST":
+        if data == "!LIST":
             list = ""
             for key, value in connDict.items():
                 list = list + str(value) + ", "
             list = list[:len(list)-2]
             conn.send(list.encode())
+            continue
 
-        else:
-            conn.send(data.encode())
+        if (data.startswith("!")):
+            flag = False
+            data = data.replace("!", "", 1)
+            for key, val in connDict.items():
+                if data.startswith(val):
+                    data = data.split(" ",1)[1]
+                    data = f"(whisper) {userName}: {data}"
+                    key.send(data.encode())
+                    flag = True
+                    
+            
+            if flag == True:
+                continue                
+
+               
+        data = userName + ": " + data
+        for key in connDict:
+            key.send(data.encode())
 
     conn.close()
     del connDict[conn]
+    for key in connDict:
+            key.send(f"{userName} disconnected".encode())
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

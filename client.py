@@ -9,10 +9,9 @@ HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 65432  # The port used by the server
 
 def receive(s):
-    print("here is receive")
     while True:        
         data = s.recv(1024).decode()
-        print(data)
+        print("\n", data)
 
 def main(argv):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -24,7 +23,7 @@ def main(argv):
         x.start()
 
         while True:
-            userInput = str(input("enter a message: "))
+            userInput = str(input(f"{userName}: "))
             
 
             if (userInput.startswith("!LIST") or userInput.startswith("!list")):
@@ -41,6 +40,7 @@ def main(argv):
                 print("<message>: Sends the message to all connected users")
                 print("!LIST: display list of all users")
                 print("!QUIT: quit chatting room")
+                print("!<user name> <message>: send message to specific user")
             else :
                 s.send(userInput.encode())
             
